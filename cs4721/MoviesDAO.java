@@ -175,6 +175,39 @@ public class MoviesDAO {
         return movieList;
     }
     
+    public ArrayList<Movie> getMoviesByTag(String tag){
+        String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
+                + "imdbPictureURL FROM movies, movie_tags "
+                + "WHERE id=movieID AND tagID IN (SELECT id FROM tags "
+                + "WHERE value LIKE '%" + tag + "%') "
+                + "GROUP BY title "
+                + "ORDER BY title";
+        ResultSet rs = null;
+        ArrayList<Movie> movieList = new ArrayList<Movie>();
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                int id = rs.getInt("id");
+                String movie_title = rs.getString("title");
+                int year = rs.getInt("year");
+                int rtAudienceScore = rs.getInt("rtAudienceScore");
+                String rtPictureURL = rs.getString("rtPictureURL");
+                String imdbPictureURL = rs.getString("imdbPictureURL");
+                movieList.add(new Movie(id, movie_title,year,imdbPictureURL,
+                        rtPictureURL,rtAudienceScore));
+            }
+            con.close();
+            stmt.close();
+            rs.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return movieList;
+    }
+    
     public ArrayList<String> getUserTags(int movieID){
         ArrayList<String> tagList = new ArrayList<String>();
         String query = "SELECT value FROM tags, movie_tags "
