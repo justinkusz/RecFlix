@@ -18,9 +18,9 @@ public class MoviesDAO {
     private Connection con;
     private Statement stmt;
     
-    public ArrayList<Movie> topMovies(int k){
-        String query = "SELECT DISTINCT title, year, rtAudienceScore, rtPictureURL,"
-                + "imdbPictureURL FROM movies "
+    public ArrayList<Movie> getTopMovies(int k){
+        String query = "SELECT DISTINCT title, year, rtAudienceScore, "
+                + "rtPictureURL, imdbPictureURL FROM movies "
                 + "ORDER BY rtAudienceScore DESC "
                 + "LIMIT " + k;
         ResultSet rs = null;
@@ -35,7 +35,37 @@ public class MoviesDAO {
                 int rtAudienceScore = rs.getInt("rtAudienceScore");
                 String rtPictureURL = rs.getString("rtPictureURL");
                 String imdbPictureURL = rs.getString("imdbPictureURL");
-                movieList.add(new Movie(title, year, imdbPictureURL, rtPictureURL, rtAudienceScore));
+                movieList.add(new Movie(title, year, imdbPictureURL, 
+                        rtPictureURL, rtAudienceScore));
+            }
+            con.close();
+            stmt.close();
+            rs.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return movieList;
+    }
+    
+    public ArrayList<Movie> getMoviesByTitle(String title){
+        String query = "SELECT title, year, rtAudienceScore, rtPictureURL, "
+                + "imdbPictureURL FROM movies "
+                + "WHERE title LIKE '%" + title + "%'";
+        ResultSet rs = null;
+        ArrayList<Movie> movieList = new ArrayList<Movie>();
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                String movie_title = rs.getString("title");
+                int year = rs.getInt("year");
+                int rtAudienceScore = rs.getInt("rtAudienceScore");
+                String rtPictureURL = rs.getString("rtPictureURL");
+                String imdbPictureURL = rs.getString("imdbPictureURL");
+                movieList.add(new Movie(movie_title,year,imdbPictureURL,
+                        rtPictureURL,rtAudienceScore));
             }
             con.close();
             stmt.close();
