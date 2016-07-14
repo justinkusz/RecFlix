@@ -19,7 +19,7 @@ public class MoviesDAO {
     private Statement stmt;
     
     public ArrayList<Movie> getTopMovies(int k){
-        String query = "SELECT DISTINCT title, year, rtAudienceScore, "
+        String query = "SELECT DISTINCT id, title, year, rtAudienceScore, "
                 + "rtPictureURL, imdbPictureURL FROM movies "
                 + "ORDER BY rtAudienceScore DESC "
                 + "LIMIT " + k;
@@ -30,12 +30,13 @@ public class MoviesDAO {
             stmt = con.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next()){
+                int id = rs.getInt("id");
                 String title = rs.getString("title");
                 int year = rs.getInt("year");
                 int rtAudienceScore = rs.getInt("rtAudienceScore");
                 String rtPictureURL = rs.getString("rtPictureURL");
                 String imdbPictureURL = rs.getString("imdbPictureURL");
-                movieList.add(new Movie(title, year, imdbPictureURL, 
+                movieList.add(new Movie(id, title, year, imdbPictureURL, 
                         rtPictureURL, rtAudienceScore));
             }
             con.close();
@@ -49,7 +50,7 @@ public class MoviesDAO {
     }
     
     public ArrayList<Movie> getMoviesByTitle(String title){
-        String query = "SELECT title, year, rtAudienceScore, rtPictureURL, "
+        String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies "
                 + "WHERE title LIKE '%" + title + "%'";
         ResultSet rs = null;
@@ -59,12 +60,13 @@ public class MoviesDAO {
             stmt = con.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next()){
+                int id = rs.getInt("id");
                 String movie_title = rs.getString("title");
                 int year = rs.getInt("year");
                 int rtAudienceScore = rs.getInt("rtAudienceScore");
                 String rtPictureURL = rs.getString("rtPictureURL");
                 String imdbPictureURL = rs.getString("imdbPictureURL");
-                movieList.add(new Movie(movie_title,year,imdbPictureURL,
+                movieList.add(new Movie(id, movie_title,year,imdbPictureURL,
                         rtPictureURL,rtAudienceScore));
             }
             con.close();
@@ -75,5 +77,26 @@ public class MoviesDAO {
             e.printStackTrace();
         }
         return movieList;
+    }
+    
+    public ArrayList<String> getUserTags(int movieID){
+        ArrayList<String> tagList = new ArrayList<String>();
+        String query = "SELECT value FROM tags, movie_tags "
+                + "WHERE movieID = " + movieID + " "
+                + "AND id=tagID";
+        ResultSet rs = null;
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                String tag = rs.getString("value");
+                tagList.add(tag);
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return tagList;
     }
 }
