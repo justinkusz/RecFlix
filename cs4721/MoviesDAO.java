@@ -114,7 +114,41 @@ public class MoviesDAO {
     public ArrayList<Movie> getMoviesByDirector(String director){
         String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies, movie_directors "
-                + "WHERE id=movieID AND directorName LIKE '%" + director + "%'";
+                + "WHERE id=movieID AND directorName LIKE '%" + director + "%' "
+                + "GROUP BY title "
+                + "ORDER BY title";
+        ResultSet rs = null;
+        ArrayList<Movie> movieList = new ArrayList<Movie>();
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                int id = rs.getInt("id");
+                String movie_title = rs.getString("title");
+                int year = rs.getInt("year");
+                int rtAudienceScore = rs.getInt("rtAudienceScore");
+                String rtPictureURL = rs.getString("rtPictureURL");
+                String imdbPictureURL = rs.getString("imdbPictureURL");
+                movieList.add(new Movie(id, movie_title,year,imdbPictureURL,
+                        rtPictureURL,rtAudienceScore));
+            }
+            con.close();
+            stmt.close();
+            rs.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return movieList;
+    }
+    
+    public ArrayList<Movie> getMoviesByActor(String actor){
+        String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
+                + "imdbPictureURL FROM movies, movie_actors "
+                + "WHERE id=movieID AND actorName LIKE '%" + actor + "%' "
+                + "GROUP BY title "
+                + "ORDER BY title";
         ResultSet rs = null;
         ArrayList<Movie> movieList = new ArrayList<Movie>();
         try{
