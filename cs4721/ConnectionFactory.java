@@ -10,9 +10,9 @@ import java.sql.SQLException;
  */
 public class ConnectionFactory {
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://192.168.0.4:3306/RECFLIX?useSSL=false";
-    static final String DB_USER = "justin";
-    static final String DB_PASS = "114theelves";
+    static final String DB_URL = "jdbc:mysql://localhost:3306/RECFLIX?useSSL=false";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "root";
     private static ConnectionFactory instance = new ConnectionFactory();
     
     private ConnectionFactory(){
