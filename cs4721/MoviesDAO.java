@@ -214,7 +214,8 @@ public class MoviesDAO {
                 + "WHERE id=movieID "
                 + "GROUP BY directorName "
                 + "HAVING COUNT(id) >= " + minMovies + " "
-                + "ORDER BY AVG(rtAudienceScore) DESC";
+                + "ORDER BY AVG(rtAudienceScore) DESC "
+                + "LIMIT 10";
         ResultSet rs = null;
         ArrayList<String> directorList = new ArrayList<String>();
         try{
@@ -234,6 +235,35 @@ public class MoviesDAO {
             e.printStackTrace();
         }
         return directorList;
+    }
+    
+    public ArrayList<String> getTopActors(int minMovies){
+        String query = "SELECT actorName, AVG(rtAudienceScore) "
+                + "FROM movie_actors, movies "
+                + "WHERE id=movieID "
+                + "GROUP BY actorName "
+                + "HAVING COUNT(id) >= " + minMovies + " "
+                + "ORDER BY AVG(rtAudienceScore) DESC "
+                + "LIMIT 10";
+        ResultSet rs = null;
+        ArrayList<String> actorList = new ArrayList<String>();
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                String actorName = rs.getString("actorName").trim();
+                double avgScore = rs.getDouble("AVG(rtAudienceScore)");
+                actorList.add(actorName + ", " + avgScore);
+            }
+            con.close();
+            stmt.close();
+            rs.close();
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return actorList;
     }
     
     public ArrayList<String> getUserTags(int movieID){
