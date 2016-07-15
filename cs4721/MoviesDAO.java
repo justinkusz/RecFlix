@@ -18,6 +18,12 @@ public class MoviesDAO {
     private Connection con;
     private Statement stmt;
     
+    /**
+     * Returns an ArrayList of the top N movies in descending order of
+     * Rotten Tomatoes audience score.
+     * @param   limit number of top movies to return
+     * @return  ArrayList of Movie objects
+     */
     public ArrayList<Movie> getTopMovies(int limit){
         String query = "SELECT DISTINCT id, title, year, rtAudienceScore, "
                 + "rtPictureURL, imdbPictureURL FROM movies "
@@ -49,6 +55,13 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns an ArrayList of the top N movies in the given genre, in
+     * descending order of Rotten Tomatoes audience score
+     * @param genre movie genre
+     * @param limit number of top movies to return
+     * @return ArrayList of Movie objects
+     */
     public ArrayList<Movie> getTopMovies(String genre, int limit){
         String query = "SELECT DISTINCT id, title, year, rtAudienceScore, "
                 + "rtPictureURL, imdbPictureURL FROM movies, movie_genres "
@@ -81,10 +94,17 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns ArrayList of movies with title containing specified string,
+     * ordered by year and title.
+     * @param title string to search for in movie titles
+     * @return ArrayList of Movie objects
+     */
     public ArrayList<Movie> getMoviesByTitle(String title){
-        String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
+        String query = "SELECT DISTINCT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies "
-                + "WHERE title LIKE '%" + title + "%'";
+                + "WHERE title LIKE '%" + title + "%' "
+                + "ORDER BY year, title ";
         ResultSet rs = null;
         ArrayList<Movie> movieList = new ArrayList<Movie>();
         try{
@@ -111,12 +131,18 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns ArrayList of movies with director names containing the
+     * specified string, ordered by year and movie title.
+     * @param director  director name to search for
+     * @return          ArrayList of Movie objects
+     */
     public ArrayList<Movie> getMoviesByDirector(String director){
         String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies, movie_directors "
                 + "WHERE id=movieID AND directorName LIKE '%" + director + "%' "
                 + "GROUP BY title "
-                + "ORDER BY title";
+                + "ORDER BY year, title";
         ResultSet rs = null;
         ArrayList<Movie> movieList = new ArrayList<Movie>();
         try{
@@ -143,12 +169,18 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns ArrayList of movies with actor names containing the
+     * specified string, ordered by year and movie title.
+     * @param actor name of actor to search for
+     * @return      ArrayList of Movie objects
+     */
     public ArrayList<Movie> getMoviesByActor(String actor){
         String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies, movie_actors "
                 + "WHERE id=movieID AND actorName LIKE '%" + actor + "%' "
                 + "GROUP BY title "
-                + "ORDER BY title";
+                + "ORDER BY year, title";
         ResultSet rs = null;
         ArrayList<Movie> movieList = new ArrayList<Movie>();
         try{
@@ -175,6 +207,12 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns ArrayList of movies with tags containing the specified
+     * string, ordered by Rotten Tomatoes audience score.
+     * @param tag   tag to search for
+     * @return      ArrayList of Movie objects
+     */
     public ArrayList<Movie> getMoviesByTag(String tag){
         String query = "SELECT id, title, year, rtAudienceScore, rtPictureURL, "
                 + "imdbPictureURL FROM movies, movie_tags "
@@ -208,6 +246,13 @@ public class MoviesDAO {
         return movieList;
     }
     
+    /**
+     * Returns ArrayList of top 10 scored directors with a minimum number
+     * of movies specified by user, ordered by averageRotten Tomatoes 
+     * audience score.
+     * @param minMovies minimum number of movies directed
+     * @return          ArrayList of Strings
+     */
     public ArrayList<String> getTopDirectors(int minMovies){
         String query = "SELECT directorName, AVG(rtAudienceScore) "
                 + "FROM movie_directors, movies "
@@ -237,6 +282,13 @@ public class MoviesDAO {
         return directorList;
     }
     
+    /**
+     * Returns ArrayList of top 10 scored actors with a minimum number
+     * of movies specified by user, ordered by average Rotten Tomatoes
+     * audience score.
+     * @param minMovies minimum number of movies acted in
+     * @return          ArrayList of Strings
+     */
     public ArrayList<String> getTopActors(int minMovies){
         String query = "SELECT actorName, AVG(rtAudienceScore) "
                 + "FROM movie_actors, movies "
@@ -266,6 +318,11 @@ public class MoviesDAO {
         return actorList;
     }
     
+    /**
+     * Returns ArrayList of Strings containing user tags for given movie
+     * @param movieID   movieID of movie
+     * @return          ArrayList of Strings containing user tags for given movie
+     */
     public ArrayList<String> getUserTags(int movieID){
         ArrayList<String> tagList = new ArrayList<String>();
         String query = "SELECT value FROM tags, movie_tags "
@@ -287,6 +344,13 @@ public class MoviesDAO {
         return tagList;
     }
     
+    /**
+     * Returns an ArrayList of Strings containing movie title and 
+     * rating, ordered by date/time of rating, in ascending order.
+     * @param userID    userID of user
+     * @return          ArrayList of Strings containing the movie title and 
+     *                      rating, separated by a tab(\t).
+     */
     public ArrayList<String> getTimeLine(int userID){
         ArrayList<String> timeLine = new ArrayList<String>();
         ResultSet rs = null;
@@ -310,6 +374,16 @@ public class MoviesDAO {
         return timeLine;
     }
     
+    /**
+     * Returns an ArrayList of Strings containing each genre of movie
+     * for which the user has rated, followed by the percentage of movies
+     * in that genre out of the total number of movies rated by the user.
+     * Genre and percentage separated by tab (\t), genres listed in descending
+     * order by percentage.
+     * @param userID    userID of user
+     * @return          ArrayList of Strings containing genre and corresponding
+     *                   percentage, separated by a tab(\t).
+     */
     public ArrayList<String> getGenreBreakdown(int userID){
         ArrayList<String> breakdown = new ArrayList<String>();
         String query = "SELECT genre, round(count(*)/(SELECT count(*) "
@@ -328,7 +402,7 @@ public class MoviesDAO {
             while(rs.next()){
                 String tag = rs.getString("genre").trim();
                 int percentage = rs.getInt("percentage");
-                breakdown.add(tag + "\t" + percentage);
+                breakdown.add(tag + "\t" + percentage + "%");
             }
         }
         catch(SQLException e){
