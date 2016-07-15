@@ -225,7 +225,7 @@ public class MoviesDAO {
             while(rs.next()){
                 String dirName = rs.getString("directorName").trim();
                 double avgScore = rs.getDouble("AVG(rtAudienceScore)");
-                directorList.add(dirName + ", " + avgScore);
+                directorList.add(dirName + "\t" + avgScore);
             }
             con.close();
             stmt.close();
@@ -254,7 +254,7 @@ public class MoviesDAO {
             while(rs.next()){
                 String actorName = rs.getString("actorName").trim();
                 double avgScore = rs.getDouble("AVG(rtAudienceScore)");
-                actorList.add(actorName + ", " + avgScore);
+                actorList.add(actorName + "\t" + avgScore);
             }
             con.close();
             stmt.close();
@@ -277,7 +277,7 @@ public class MoviesDAO {
             stmt = con.createStatement();
             rs = stmt.executeQuery(query);
             while(rs.next()){
-                String tag = rs.getString("value");
+                String tag = rs.getString("value").trim();
                 tagList.add(tag);
             }
         }
@@ -285,5 +285,55 @@ public class MoviesDAO {
             e.printStackTrace();
         }
         return tagList;
+    }
+    
+    public ArrayList<String> getTimeLine(int userID){
+        ArrayList<String> timeLine = new ArrayList<String>();
+        ResultSet rs = null;
+        String query = "SELECT title, rating FROM movies, user_ratedmovies as r "
+                + "WHERE id=movieID AND userID=" + userID + " "
+                + "ORDER BY r.date_year, r.date_month, r.date_day, r.date_hour,"
+                + " r.date_minute, r.date_second ASC";
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                String title = rs.getString("title").trim();
+                double rating = rs.getDouble("rating");
+                timeLine.add(title + "\t" + rating);
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return timeLine;
+    }
+    
+    public ArrayList<String> getGenreBreakdown(int userID){
+        ArrayList<String> breakdown = new ArrayList<String>();
+        String query = "SELECT genre, round(count(*)/(SELECT count(*) "
+                + "FROM user_ratedmovies "
+                + "WHERE userID=" + userID + ")*100) as percentage "
+                + "FROM user_ratedmovies, movie_genres "
+                + "WHERE userID=" + userID + " "
+                + "AND user_ratedmovies.movieID=movie_genres.movieID "
+                + "GROUP BY genre "
+                + "ORDER BY percentage DESC";
+        ResultSet rs = null;
+        try{
+            con = ConnectionFactory.getConnection();
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            while(rs.next()){
+                String tag = rs.getString("genre").trim();
+                int percentage = rs.getInt("percentage");
+                breakdown.add(tag + "\t" + percentage);
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return breakdown;
     }
 }
